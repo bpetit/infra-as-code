@@ -4,7 +4,7 @@
     - project_dir: terraform
   tasks:
     - name: getting public ipv4 address to fill security groups configuration
-      shell: curl http://ifconfig.io
+      shell: curl http://api.ipify.org # http://ifconfig.io
       register: result
     - name: generating configuration for terraform
       template:
@@ -20,7 +20,6 @@
         project_path: "{{ project_dir }}"
         state: "{{ tf_action | default('present') }}"
       register: result
-    - debug: var=result
     - name: generate ansible inventory file
       template:
         src: templates/ansible_inventory.j2
@@ -33,6 +32,15 @@
       with_items:
         - "{{ result.outputs.dns.value }}"
       when: tf_action is not defined or tf_action == 'present'
+
+- hosts: lab
+  user: admin
+  gather_facts: no
+  tasks:
+    - name: wait for ssh connection
+      wait_for_connection:
+        timeout: 300
+        delay: 2
 
 - hosts: lab
   user: admin
