@@ -1,4 +1,4 @@
 [all]
-{% for ip in result.outputs.dns.value %}
-{{ ip }}
+{% for name in result.outputs.dns.value %}
+{{ name }}
 {% endfor %}
