@@ -1,0 +1,10 @@
+output "dns" {
+	value = [
+{% for instance_name in ansible_tf_instances %}
+		"${aws_instance.{{ instance_name }}.public_dns}"
+		{% if loop.index + 1 < loop.length - 1 %}
+		,
+		{% endif %}
+{% endfor %}
+	]
+}

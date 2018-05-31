@@ -1,0 +1,8 @@
+server {
+	listen 80;
+	listen [::]:80;
+	server_name {{ project_name }};
+	access_log {{ project_name }}_access.log;
+	error_log {{ project_name }}_error.log;
+	root {{ install_dir }};
+}

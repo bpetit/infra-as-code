@@ -1,0 +1,34 @@
+- name: installing requirements
+  apt:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - nginx
+    - git
+- name: cloning project repository
+  git:
+    repo: https://github.com/simonlc/tetr.js.git
+    dest: "{{ install_dir }}"
+    update: yes
+- name: configuring vhost
+  template:
+    src: templates/nginx_vhost.j2
+    dest: "/etc/nginx/sites-available/{{ project_name }}.conf"
+  tags: nginx
+- name: enabling vhost
+  file:
+    state: link
+    src: "/etc/nginx/sites-available/{{ project_name }}.conf"
+    dest: "/etc/nginx/sites-enabled/{{ project_name }}.conf"
+  tags: nginx
+- name: increasing domain name size limit
+  lineinfile:
+    path: /etc/nginx/nginx.conf
+    line: "server_names_hash_bucket_size 128;"
+    insertafter: "^http {"
+  tags: nginx
+- name: reloading nginx
+  service:
+    name: nginx
+    state: reloaded
+  tags: nginx

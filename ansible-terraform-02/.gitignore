@@ -1,0 +1,4 @@
+*.swp
+*.backup
+terraform/terraform*
+terraform/.terraform*

@@ -1,0 +1,45 @@
+- hosts: localhost
+  connection: local
+  vars:
+    - project_dir: terraform
+  tasks:
+    - name: getting public ipv4 address to fill security groups configuration
+      shell: curl http://ifconfig.io
+      register: result
+    - name: generating configuration for terraform
+      template:
+        src: "templates/{{ item }}.j2"
+        dest: "{{ project_dir }}/{{ item }}"
+      with_items:
+        - variables.tf
+        - instances.tf
+        - output.tf
+        - ssh.tf
+    - name: applying terraform configuration
+      terraform:
+        project_path: "{{ project_dir }}"
+        state: "{{ tf_action | default('present') }}"
+      register: result
+    - debug: var=result
+    - name: generate ansible inventory file
+      template:
+        src: templates/ansible_inventory.j2
+        dest: inventory
+      when: tf_action is not defined or tf_action == 'present'
+    - name: adding host to in-memory inventory
+      add_host:
+        name: "{{ item }}"
+        group: lab
+      with_items:
+        - "{{ result.outputs.dns.value }}"
+      when: tf_action is not defined or tf_action == 'present'
+
+- hosts: lab
+  user: admin
+  become: yes
+  vars:
+    - install_dir: /srv/tetr.js
+    - project_name: "{{ inventory_hostname }}"
+  tasks:
+    - include_tasks: ansible/main.yml
+      when: tf_action is not defined or tf_action == 'present'

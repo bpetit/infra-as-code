@@ -1,0 +1,6 @@
+{% for key_name, pkey in ansible_tf_ssh_keys.items() %}
+	resource "aws_key_pair" "{{ key_name }}" {
+	  key_name   = "{{ key_name }}"
+	  public_key = "{{ pkey }}"
+	}
+{% endfor %}

@@ -1,0 +1,4 @@
+[all]
+{% for ip in result.outputs.dns.value %}
+{{ ip }}
+{% endfor %}
